@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Meme Ninja</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Add Howler.js via CDN -->
+    <script src="https://unpkg.com/howler@2.2.4/dist/howler.min.js"></script>
+    <style>
+        html, body { 
+            margin: 0; 
+            overflow: hidden; 
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: rgb(20, 20, 20);
+            height: 100vh;
+            width: 100vw;
+            touch-action: none; /* Prevent default touch actions like pinch-to-zoom */
+        }
+        canvas { 
+            display: block; 
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+        }
+        #startMenu, #gameOverScreen, #levelCompleteScreen, #scoreLevelBox, #tapToStartScreen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            font-family: Arial, sans-serif;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 10;
+        }
+        #startMenu {
+            transform: translate(-50%, -50%) scale(1.5);
+            transform-origin: center;
+            color: rgb(255, 215, 0);
+            padding: 30px;
+            border-radius: 15px;
+        }
+        #startMenu h1 {
+            margin: 0 0 15px 0;
+            font-family: 'Impact', sans-serif;
+            font-size: 48px;
+            color: #FFCB2F;
+            text-transform: uppercase;
+        }
+        #startMenu p {
+            margin: 0 0 20px 0;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        #startMenu ul {
+            text-align: left;
+            display: inline-block;
+            margin: 0 0 20px 0;
+            padding-left: 20px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 16px;
+            color: rgb(255, 215, 0);
+        }
+        #startMenu li {
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        #startMenu button {
+            padding: 12px 24px;
+            font-size: 20px;
+            font-family: 'Arial Black', sans-serif;
+            color: rgb(218, 165, 32);
+            background-color: rgb(255, 215, 0);
+            border: 2px solid rgb(218, 165, 32);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            touch-action: none;
+            margin: 5px;
+        }
+        #startMenu button:hover {
+            background-color: rgb(218, 165, 32);
+            color: rgb(255, 215, 0);
+        }
+        #gameOverScreen, #levelCompleteScreen {
+            transform: translate(-50%, -50%) scale(1.5);
+            transform-origin: center;
+            color: rgb(255, 215, 0);
+            padding: 30px;
+            border-radius: 15px;
+        }
+        #gameOverScreen h1, #levelCompleteScreen h1 {
+            margin: 0 0 15px 0;
+            font-family: 'Impact', sans-serif;
+            font-size: 48px;
+            color: rgb(218, 165, 32);
+            text-transform: uppercase;
+        }
+        #gameOverScreen p, #levelCompleteScreen p {
+            margin: 0 0 20px 0;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        #gameOverScreen button, #levelCompleteScreen button {
+            padding: 12px 24px;
+            font-size: 20px;
+            font-family: 'Arial Black', sans-serif;
+            color: rgb(218, 165, 32);
+            background-color: rgb(255, 215, 0);
+            border: 2px solid rgb(218, 165, 32);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        #gameOverScreen button:hover, #levelCompleteScreen button:hover {
+            background-color: rgb(218, 165, 32);
+            color: rgb(255, 215, 0);
+        }
+        #scoreLevelBox {
+            top: 10px;
+            left: 10px;
+            transform: none;
+            text-align: left;
+        }
+        #scoreLevelBox p {
+            margin: 0 0 10px 0;
+        }
+        #scoreLevelBox p:last-child {
+            margin: 0;
+        }
+        #tapToStartScreen {
+            transform: translate(-50%, -50%) scale(1.5);
+            transform-origin: center;
+            color: rgb(255, 215, 0);
+            padding: 30px;
+            border-radius: 15px;
+            z-index: 20;
+        }
+        #tapToStartScreen h1 {
+            margin: 0 0 15px 0;
+            font-family: 'Impact', sans-serif;
+            font-size: 48px;
+            color: #FFCB2F;
+            text-transform: uppercase;
+        }
+        #tapToStartScreen p {
+            margin: 0 0 20px 0;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: bold;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        #volumeIcon {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            width: 30px;
+            height: 30px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            cursor: pointer;
+            z-index: 1000; /* Ensure it’s clickable */
+        }
+        @media only screen and (max-width: 768px) {
+            #startMenu {
+                transform: translate(-50%, -50%) scale(1.0);
+                padding: 15px;
+            }
+            #startMenu h1 {
+                font-size: 36px;
+            }
+            #startMenu p {
+                font-size: 16px;
+            }
+            #startMenu ul {
+                font-size: 14px;
+            }
+            #startMenu button {
+                padding: 10px 20px;
+                font-size: 16px;
+            }
+            #gameOverScreen, #levelCompleteScreen {
+                transform: translate(-50%, -50%) scale(1.0);
+                padding: 15px;
+            }
+            #gameOverScreen h1, #levelCompleteScreen h1 {
+                font-size: 32px;
+            }
+            #gameOverScreen p, #levelCompleteScreen p {
+                font-size: 14px;
+            }
+            #gameOverScreen button, #levelCompleteScreen button {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+            #scoreLevelBox {
+                top: 5px;
+                left: 5px;
+                padding: 5px;
+            }
+            #scoreLevelBox p {
+                font-size: 12px;
+            }
+            #tapToStartScreen {
+                transform: translate(-50%, -50%) scale(1.0);
+                padding: 15px;
+            }
+            #tapToStartScreen h1 {
+                font-size: 36px;
+            }
+            #tapToStartScreen p {
+                font-size: 16px;
+            }
+            #volumeIcon {
+                width: 24px;
+                height: 24px;
+                bottom: 5px;
+                left: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="scoreLevelBox" style="display: none;">
+        <p>Score: <span id="scoreDisplay">0</span></p>
+        <p>Level: <span id="levelDisplay">1</span></p>
+    </div>
+
+    <div id="tapToStartScreen">
+        <h1>Meme Ninja</h1>
+        <p>Tap to Start</p>
+    </div>
+
+    <div id="startMenu" style="display: none;">
+        <h1>Meme Ninja</h1>
+        <p>Instructions:</p>
+        <ul>
+            <li>You're getting <b>REKT</b> out here!!! Cut your losses by slicing through the memecoins.</li>
+            <li>Earn 10 points and restore some capital with each slice. DIVORCE YOUR BAGS, FREN.</li>
+            <li>If your capital runs out...🤷‍♂️ life has dreams, each is wonderful.</li>
+        </ul>
+        <button id="startButton">Start Game</button>
+    </div>
+  
+    <div id="gameOverScreen" style="display: none;">
+        <h1>Game Over!</h1>
+        <p>Score: <span id="finalScore">0</span></p>
+        <p>Mistakes were made in a wallet you control.</p>
+        <button id="restartButtonGameOver">Restart</button>
+        <button id="mainMenuButton">Main Menu</button>
+    </div>
+  
+    <div id="levelCompleteScreen" style="display: none;">
+        <h1>Level <span id="currentLevel">1</span> Complete!</h1>
+        <p>Score: <span id="currentScore">0</span></p>
+        <p>Bonus (5 pts per 2nd slice): <span id="bonusScore">0</span></p>
+        <button id="continueButton">Continue</button>
+        <button id="restartButtonLevelComplete">Restart</button>
+    </div>
+
+    <div id="volumeIcon" style="background-image: url('https://cdn.glitch.global/c173f5ae-c12b-40cc-90d0-fba2c34459be/volume-on.png?v=1742990116437');"></div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const startMenu = document.getElementById('startMenu');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const finalScore = document.getElementById('finalScore');
+        const levelCompleteScreen = document.getElementById('levelCompleteScreen');
+        const currentLevelElement = document.getElementById('currentLevel');
+        const currentScoreElement = document.getElementById('currentScore');
+        const bonusScoreElement = document.getElementById('bonusScore');
+        const scoreLevelBox = document.getElementById('scoreLevelBox');
+        const tapToStartScreen = document.getElementById('tapToStartScreen');
+        const volumeIcon = document.getElementById('volumeIcon');
+        const startButton = document.getElementById('startButton');
+        const continueButton = document.getElementById('continueButton');
+        const restartButtonLevelComplete = document.getElementById('restartButtonLevelComplete');
+        const restartButtonGameOver = document.getElementById('restartButtonGameOver');
+        const mainMenuButton = document.getElementById('mainMenuButton');
+
+        let score = 0;
+        let level = 1;
+        let gameOver = false;
+        let levelComplete = false;
+        let slicedHalves = 0;
+        let fruits = [];
+        let fruitHalves = [];
+        let swipePath = [];
+        let isMuted = false;
+        let playedLevelCompleteSounds = []; // Track played level complete sounds in a session
+        let playedGameOverSounds = []; // Track played game over sounds in a session
+
+        // Check if Howler.js is loaded
+        if (typeof Howl === 'undefined') {
+            console.error('Howler.js failed to load. Audio features will be disabled.');
+        } else {
+            // Force HTML5 Audio for better mobile compatibility
+            Howler.html5 = true;
+        }
+
+        // Initialize the soundtrack
+        const soundtrack = typeof Howl !== 'undefined' ? new Howl({
+            src: ['https://cdn.glitch.global/c173f5ae-c12b-40cc-90d0-fba2c34459be/Soundtrack.mp3?v=1742984177229'],
+            preload: true,
+            loop: true,
+            volume: 0.5, // 50% volume
+            onload: () => {
+                console.log('Soundtrack loaded');
+            },
+            onloaderror: (id, error) => console.error('Failed to load soundtrack:', error)
+        }) : null;
+
+        // Initialize Howl instances for swipe sounds
+        const swipeSounds = typeof Howl !== 'undefined' ? [
+            new Howl({
+                src: ['https://cdn.glitch.global/c173f5ae-c12b-40cc-90d0-fba2c34459be/swipe1.mp3?v=1742983244045'],
+                preload: true,
+                onload: () => console.log('Swipe sound 1 loaded'),
+                onloaderror: (id, error) => console.error('Failed to load swipe sound 1:', error)
+            }),
+            new Howl({
+                src: ['https://cdn.glitch.global/c173f5ae-c12b-40cc-90d0-fba2c34459be/swipe3.mp3?v=1742983562238'],
+                preload: true,
+                onload: () => console.log('Swipe sound 2 loaded'),
+                onloaderror: (id, error) => console.error('Failed to load swipe sound 2:', error)
+            })
+        ] : [];
+
+        // Initialize Howl instances for level complete sounds
+        const levelCompleteSounds = typeof Howl !== 'undefined' ? [
+            new Howl({
+                src: ['https://cdn.glitch.global/c173f5ae-c12b-40cc-90d0-fba2c34459be/levelcomplete1.mp3?v=1742985127095'],
+                preload: true,
+                onload: () => console.log('Level complete sound 1 loaded'),
+                onloaderror: (id, error) => console.error('Failed to load level complete sound 1:', error)
+            }),
+            new Howl({
+                src: ['https://cdn.glitch.global/c173f5ae-c12b-40cc-90d0-fba2c34459be/levelcomplete2.mp3?v=1742985132872'],
+                preload: true,
+                onload: () => console.log('Level complete sound 2 loaded'),
+                onloaderror: (id, error) => console.error('Failed to load level complete sound 2:', error)
+            }),
+            new Howl({
+                src: ['https://cdn.glitch.global/c173f5ae-c12b-40cc-90d0-fba2c34459be/levelcomplete3.mp3?v=1742985134789'],
+                preload: true,
+                onload: () => console.log('Level complete sound 3 loaded'),
+                onloaderror: (id, error) => console.error('Failed to load level complete sound 3:', error)
+            }),
+            new Howl({
+                src: ['https://cdn.glitch.global/c173f5ae-c12b-40cc-90d0-fba2c34459be/levelcomplete4.mp3?v=1742985137016'],
+                preload: true,
+                onload: () => console.log('Level complete sound 4 loaded'),
+                onloaderror: (id, error) => console.error('Failed to load level complete sound 4:', error)
+            }),
+            new Howl({
+                src: ['https://cdn.glitch.global/c173f5ae-c12b-40cc-90d0-fba2c34459be/levelcomplete5.mp3?v=1742985141884'],
+                preload: true,
+                onload: () => console.log('Level complete sound 5 loaded'),
+                onloaderror: (id, error) => console.error('Failed to load level complete sound 5:', error)
+            }),
+            new Howl({
+                src: ['https://cdn.glitch.global/c173f5ae-c12b-40cc-90d0-fba2c34459be/levelcomplete6.mp3?v=1742985146643'],
+                preload: true,
+                onload: () => console.log('Level complete sound 6 loaded'),
+                onloaderror: (id, error) => console.error('Failed to load level complete sound 6:', error)
+            })
+        ] : [];
+
+        // Initialize Howl instances for start game sounds
+        const startGameSounds = typeof Howl !== 'undefined' ? [
+            new Howl({
+                src: ['https://cdn.glitch.global/c173f5ae-c12b-40cc-90d0-fba2c34459be/Welcome.mp3?v=1742985951814'],
+                preload: true,
+                onload: () => console.log('Start game sound 1 loaded'),
+                onloaderror: (id, error) => console.error('Failed to load start game sound 1:', error)
+            }),
+            new Howl({
+                src: ['https://cdn.glitch.global/c173f5ae-c12b-40cc-90d0-fba2c34459be/introsendmoney.mp3?v=1742985943292'],
+                preload: true,
+                onload: () => console.log('Start game sound 2 loaded'),
+                onloaderror: (id, error) => console.error('Failed to load start game sound 2:', error)
+            })
+        ] : [];
+
+        // Initialize Howl instances for restart game sounds
+        const restartGameSounds = typeof Howl !== 'undefined' ? [
+            new Howl({
+                src: ['https://cdn.glitch.global/c173f5ae-c12b-40cc-90d0-fba2c34459be/rugged.mp3?v=1742985956223'],
+                preload: true,
+                onload: () => console.log('Restart game sound 1 loaded'),
+                onloaderror: (id, error) => console.error('Failed to load restart game sound 1:', error)
+            }),
+            new Howl({
+                src: ['https://cdn.glitch.global/c173f5ae-c12b-40cc-90d0-fba2c34459be/MemeNinja.mp3?v=1742985960426'],
+                preload: true,
+                onload: () => console.log('Restart game sound 2 loaded'),
+                onloaderror: (id, error) => console.error('Failed to load restart game sound 2:', error)
+            })
+        ] : [];
+
+        // Initialize Howl instances for game over sounds
+        const gameOverSounds = typeof Howl !== 'undefined' ? [
+            new Howl({
+                src: ['https://cdn.glitch.global/c173f5ae-c12b-40cc-90d0-fba2c34459be/gameover1.mp3?v=1742993179852'],
+                preload: true,
+                onload: () => console.log('Game over sound 1 loaded'),
+                onloaderror: (id, error) => console.error('Failed to load game over sound 1:', error)
+            }),
+            new Howl({
+                src: ['https://cdn.glitch.global/c173f5ae-c12b-40cc-90d0-fba2c34459be/gameover2.mp3?v=1742993182702'],
+                preload: true,
+                onload: () => console.log('Game over sound 2 loaded'),
+                onloaderror: (id, error) => console.error('Failed to load game over sound 2:', error)
+            }),
+            new Howl({
+                src: ['https://cdn.glitch.global/c173f5ae-c12b-40cc-90d0-fba2c34459be/gameover3.mp3?v=1742993185074'],
+                preload: true,
+                onload: () => console.log('Game over sound 3 loaded'),
+                onloaderror: (id, error) => console.error('Failed to load game over sound 3:', error)
+            }),
+            new Howl({
+                src: ['https://cdn.glitch.global/c173f5ae-c12b-40cc-90d0-fba2c34459be/gameover4.mp3?v=1742993186946'],
+                preload: true,
+                onload: () => console.log('Game over sound 4 loaded'),
+                onloaderror: (id, error) => console.error('Failed to load game over sound 4:', error)
+            }),
+            new Howl({
+                src: ['https://cdn.glitch.global/c173f5ae-c12b-40cc-90d0-fba2c34459be/gameover5.mp3?v=1742993188848'],
+                preload: true,
+                onload: () => console.log('Game over sound 5 loaded'),
+                onloaderror: (id, error) => console.error('Failed to load game over sound 5:', error)
+            }),
+            new Howl({
+                src: ['https://cdn.glitch.global/c173f5ae-c12b-40cc-90d0-fba2c34459be/gameover6.mp3?v=1742993190950'],
+                preload: true,
+                onload: () => console.log('Game over sound 6 loaded'),
+                onloaderror: (id, error) => console.error('Failed to load game over sound 6:', error)
+            }),
+            new Howl({
+                src: ['https://cdn.glitch.global/c173f5ae-c12b-40cc-90d0-fba2c34459be/gameover7.mp3?v=1742993192933'],
+                preload: true,
+                onload: () => console.log('Game over sound 7 loaded'),
+                onloaderror: (id, error) => console.error('Failed to load game over sound 7:', error)
+            })
+        ] : [];
+
+        function playRandomSwipeSound() {
+            if (isMuted || swipeSounds.length === 0) {
+                console.warn('Swipe sound not played: Muted or no sounds available');
+                return;
+            }
+            try {
+                console.log('Attempting to play a swipe sound');
+                const randomIndex = Math.floor(Math.random() * swipeSounds.length);
+                const sound = swipeSounds[randomIndex];
+                sound.play();
+                console.log('Swipe sound played:', randomIndex);
+            } catch (error) {
+                console.error('Error playing swipe sound:', error);
+            }
+        }
+
+        function playRandomLevelCompleteSound() {
+            if (isMuted || levelCompleteSounds.length === 0) {
+                console.warn('Level complete sound not played: Muted or no sounds available');
+                return;
+            }
+            try {
+                console.log('Attempting to play a level complete sound');
+
+                // Create a list of available sound indices that haven't been played
+                let availableIndices = [];
+                for (let i = 0; i < levelCompleteSounds.length; i++) {
+                    if (!playedLevelCompleteSounds.includes(i)) {
+                        availableIndices.push(i);
+                    }
+                }
+
+                // If all sounds have been played, reset the list
+                if (availableIndices.length === 0) {
+                    playedLevelCompleteSounds = [];
+                    availableIndices = Array.from({ length: levelCompleteSounds.length }, (_, i) => i);
+                }
+
+                // Pick a random index from the available ones
+                const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+                playedLevelCompleteSounds.push(randomIndex);
+
+                const sound = levelCompleteSounds[randomIndex];
+                sound.play();
+                console.log('Level complete sound played:', randomIndex);
+            } catch (error) {
+                console.error('Error playing level complete sound:', error);
+            }
+        }
+
+        function playRandomStartGameSound() {
+            if (isMuted || startGameSounds.length === 0) {
+                console.warn('Start game sound not played: Muted or no sounds available');
+                return;
+            }
+            try {
+                console.log('Attempting to play a start game sound');
+                const randomIndex = Math.floor(Math.random() * startGameSounds.length);
+                const sound = startGameSounds[randomIndex];
+                sound.play();
+                console.log('Start game sound played:', randomIndex);
+            } catch (error) {
+                console.error('Error playing start game sound:', error);
+            }
+        }
+
+        function playRandomRestartGameSound() {
+            if (isMuted || restartGameSounds.length === 0) {
+                console.warn('Restart game sound not played: Muted or no sounds available');
+                return;
+            }
+            try {
+                console.log('Attempting to play a restart game sound');
+                const randomIndex = Math.floor(Math.random() * restartGameSounds.length);
+                const sound = restartGameSounds[randomIndex];
+                sound.play();
+                console.log('Restart game sound played:', randomIndex);
+            } catch (error) {
+                console.error('Error playing restart game sound:', error);
+            }
+        }
+
+        function playRandomGameOverSound() {
+            if (isMuted || gameOverSounds.length === 0) {
+                console.warn('Game over sound not played: Muted or no sounds available');
+                return;
+            }
+            try {
+                console.log('Attempting to play a game over sound');
+
+                // Create a list of available sound indices that haven't been played
+                let availableIndices = [];
+                for (let i = 0; i < gameOverSounds.length; i++) {
+                    if (!playedGameOverSounds.includes(i)) {
+                        availableIndices.push(i);
+                    }
+                }
+
+                // If all sounds have been played, reset the list
+                if (availableIndices.length === 0) {
+                    playedGameOverSounds = [];
+                    availableIndices = Array.from({ length: gameOverSounds.length }, (_, i) => i);
+                }
+
+                // Pick a random index from the available ones
+                const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+                playedGameOverSounds.push(randomIndex);
+
+                const sound = gameOverSounds[randomIndex];
+                sound.play();
+                console.log('Game over sound played:', randomIndex);
+            } catch (error) {
+                console.error('Error playing game over sound:', error);
+            }
+        }
+
+        // Toggle mute/unmute for all sounds
+        function toggleMute() {
+            console.log('toggleMute called');
+            isMuted = !isMuted;
+            if (isMuted) {
+                Howler.mute(true);
+                volumeIcon.style.backgroundImage = "url('https://cdn.glitch.global/c173f5ae-c12b-40cc-90d0-fba2c34459be/volume-off.png?v=1742990118972')";
+            } else {
+                Howler.mute(false);
+                volumeIcon.style.backgroundImage = "url('https://cdn.glitch.global/c173f5ae-c12b-40cc-90d0-fba2c34459be/volume-on.png?v=1742990116437')";
+            }
+            console.log('Sound muted:', isMuted);
+        }
+
+        // Add click/touch event listener for the volume icon
+        volumeIcon.addEventListener('click', (e) => {
+            e.preventDefault();
+            toggleMute();
+        });
+        volumeIcon.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            toggleMute();
+        });
+
+        const MEMECOIN_TICKERS = [
+            "DOGE", "SHIB", "PEPE", "WIF", "BONK", "FLOKI", "BRETT", "MEME", "TRUMP", "POPCAT",
+            "MOG", "TURBO", "GIGA", "SPX", "DEGEN", "ai16z", "BITCOIN", "ELON", "SAMO", "SIGMA",
+            "KISHU", "AKITA", "HOGE", "TOSHI", "BOME", "NEIRO", "JUP", "MOODENG", "HAWK", "PNUT",
+            "BANANA", "SLERF", "MEW", "CORGIAI", "SHIT", "FARTCOIN", "MILO", "KEYCAT", "GOAT", "MIGGLES",
+            "SKI", "BENJI", "MOCHI", "DOGINME", "UFD", "REKT", "SKIBIDI", "MOTHER", "NYAN", "GRUMPY",
+            "TOKYO", "PUG", "CHIBA", "BORK", "CHEESE", "DINU", "CHONKY", "WEN", "PAW", "SNEK", "MYRO",
+            "JAILSTOOL", "BALD", "ZACK", "DINO", "KANGAL", "HUSKY", "BULL", "CAT", "RFD", "GME", "AMC",
+            "BOBO", "FREN", "SMILYmeasurements", "ANALOS", "LADYS", "POOH", "ZEREBRO", "VINU", "LEASH", "XAI", "SAFEMOON",
+            "PIG", "KIBA", "DOBO", "FLOKITA", "SEILOR", "WOOF", "COQ", "HAMI", "DOGGY", "PONKE",
+            "PENG", "SCREAM", "BAN", "PWEASE", "MONA", "GOVAI", "GREED2"
+        ];
+
+        let life = 100;
+        const LIFE_BAR_WIDTH = 200;
+        const LIFE_BAR_HEIGHT = 20;
+        let LIFE_DEPLETION_RATE = 0.05;
+        const LIFE_GAIN_PER_FRUIT = 10;
+
+        const GRAVITY = 0.15;
+        const MAX_HORIZONTAL_VELOCITY = 3;
+        const MAX_SWIPE_LENGTH = 200;
+
+        const BACKGROUND_IMAGES = [
+            'https://pbs.twimg.com/media/GRkzW4hbAAAefJk.jpg',
+            'https://i.pinimg.com/474x/3e/28/b8/3e28b8269ddb5c77466f993c1620bf28.jpg',
+            'https://motivatingdaily.com/wp-content/uploads/2013/01/endurance.jpg?w=584',
+            'https://media.npr.org/assets/img/2016/09/01/narcos_203_00873r1_wide-85dd278b73b9b27e5ec91b5d5e63be31df849d39.jpg',
+            'https://i.insider.com/6127fca280be940019b9de4c?width=792&format=jpeg',
+            'https://i.kym-cdn.com/entries/icons/original/000/023/077/Leo_Toasting_meme_banner.jpg',
+            'https://images.wsj.net/im-06281483?width=700&height=389',
+            'https://pbs.twimg.com/profile_banners/1853579246150553600/1741103526/1500x500',
+            'https://i.ytimg.com/vi/EmW74ZpGGOI/maxresdefault.jpg'
+        ];
+
+        function setRandomBackground() {
+            const randomIndex = Math.floor(Math.random() * BACKGROUND_IMAGES.length);
+            document.body.style.backgroundImage = `url('${BACKGROUND_IMAGES[randomIndex]}')`;
+        }
+        setRandomBackground();
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Fruit {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height;
+                this.radius = 33 + Math.random() * 100;
+                this.velocityY = 7 + Math.random() * 15;
+                this.velocityX = (Math.random() - 0.5) * MAX_HORIZONTAL_VELOCITY * 2;
+                this.rotation = 0;
+                this.ticker = MEMECOIN_TICKERS[Math.floor(Math.random() * MEMECOIN_TICKERS.length)];
+            }
+
+            update() {
+                this.velocityY -= GRAVITY;
+                this.x += this.velocityX;
+                this.y -= this.velocityY;
+                this.rotation += 0.1;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+
+                ctx.fillStyle = 'rgb(255, 215, 0)';
+                ctx.beginPath();
+                ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = 'rgb(218, 165, 32)';
+                ctx.beginPath();
+                ctx.arc(0, 0, this.radius * 0.9, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = 'rgb(255, 215, 0)';
+                ctx.beginPath();
+                ctx.arc(0, 0, this.radius * 0.8, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = 'rgb(218, 165, 32)';
+                const textSize = this.ticker.length <= 5 ? Math.max(10, this.radius * 0.4) : Math.max(10, this.radius * 0.25);
+                ctx.font = `${textSize}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.ticker, 0, 0);
+
+                ctx.restore();
+            }
+        }
+
+        class FruitHalf {
+            constructor(x, y, radius, angle, splittable = false, type = "half") {
+                this.x = x;
+                this.y = y;
+                this.radius = radius;
+                this.angle = angle;
+                this.velocityX = Math.cos(angle) * 5;
+                this.velocityY = Math.sin(angle) * -5;
+                this.rotation = 0;
+                this.splittable = splittable;
+                this.type = type;
+                this.percentage = type === "half" ? 
+                    Math.floor(Math.random() * (75 - 50 + 1)) + 50 : 
+                    Math.floor(Math.random() * (99 - 76 + 1)) + 76;
+            }
+
+            update() {
+                this.velocityY += GRAVITY;
+                this.x += this.velocityX;
+                this.y += this.velocityY;
+                this.rotation += 0.1;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                ctx.fillStyle = '#E72C1E';
+                ctx.beginPath();
+                ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+                const fontSize = Math.max(10, this.radius - 8);
+                ctx.font = `${fontSize}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = 'white';
+                ctx.fillText(`-${this.percentage}%`, 0, 0);
+                ctx.restore();
+            }
+        }
+
+        function drawLifeBar() {
+            const lifeBarX = canvas.width - LIFE_BAR_WIDTH - 20;
+            const lifeBarY = 20;
+            ctx.fillStyle = 'black';
+            ctx.fillRect(lifeBarX, lifeBarY, LIFE_BAR_WIDTH, LIFE_BAR_HEIGHT);
+            ctx.fillStyle = 'green';
+            ctx.fillRect(lifeBarX, lifeBarY, (life / 100) * LIFE_BAR_WIDTH, LIFE_BAR_HEIGHT);
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(lifeBarX, lifeBarY, LIFE_BAR_WIDTH, LIFE_BAR_HEIGHT);
+        }
+
+        function drawKnifeSwipe() {
+            if (swipePath.length < 2) return;
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(swipePath[0].x, swipePath[0].y);
+            for (let i = 1; i < swipePath.length; i++) {
+                ctx.lineTo(swipePath[i].x, swipePath[i].y);
+            }
+            ctx.stroke();
+        }
+
+        function continueGame() {
+            console.log('continueGame called');
+            levelComplete = false;
+            gameOver = false;
+            level++;
+            life = 100;
+            LIFE_DEPLETION_RATE += 0.05;
+            slicedHalves = 0;
+            levelCompleteScreen.style.display = 'none';
+            setRandomBackground();
+            document.getElementById('levelDisplay').textContent = level;
+            scoreLevelBox.style.display = 'block';
+            gameLoop();
+        }
+
+        function restartGame() {
+            console.log('restartGame called');
+            gameOver = false;
+            levelComplete = false;
+            score = 0;
+            level = 1;
+            life = 100;
+            LIFE_DEPLETION_RATE = 0.05;
+            slicedHalves = 0;
+            fruits = [];
+            fruitHalves = [];
+            swipePath = [];
+            levelCompleteScreen.style.display = 'none';
+            gameOverScreen.style.display = 'none';
+            startMenu.style.display = 'none';
+            setRandomBackground();
+            document.getElementById('scoreDisplay').textContent = score;
+            document.getElementById('levelDisplay').textContent = level;
+            scoreLevelBox.style.display = 'block';
+
+            playRandomRestartGameSound();
+
+            gameLoop();
+        }
+
+        function checkLevelCompletion() {
+            if (score >= 250 * level && !levelComplete) {
+                levelComplete = true;
+                gameOver = true;
+                currentLevelElement.textContent = level;
+                currentScoreElement.textContent = score;
+                const bonus = slicedHalves * 5;
+                bonusScoreElement.textContent = bonus;
+                score += bonus;
+                currentScoreElement.textContent = score;
+                levelCompleteScreen.style.display = 'block';
+                playRandomLevelCompleteSound();
+            }
+        }
+
+        function gameLoop() {
+            if (gameOver) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (Math.random() < 0.02) fruits.push(new Fruit());
+
+            fruits = fruits.filter(fruit => {
+                fruit.update();
+                fruit.draw();
+                return fruit.y - fruit.radius < canvas.height && 
+                       fruit.x + fruit.radius > 0 && 
+                       fruit.x - fruit.radius < canvas.width;
+            });
+
+            fruitHalves = fruitHalves.filter(half => {
+                half.update();
+                half.draw();
+                return half.y - half.radius < canvas.height && 
+                       half.x + half.radius > 0 && 
+                       half.x - half.radius < canvas.width;
+            });
+
+            document.getElementById('scoreDisplay').textContent = score;
+            document.getElementById('levelDisplay').textContent = level;
+
+            life -= LIFE_DEPLETION_RATE;
+            if (life <= 0) {
+                life = 0;
+                endGame();
+            }
+
+            drawLifeBar();
+            drawKnifeSwipe();
+            checkLevelCompletion();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        let isSwiping = false;
+
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            isSwiping = true;
+        });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            isSwiping = false;
+            swipePath = [];
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            handleSwipe(e);
+        });
+
+        canvas.addEventListener('mousedown', (e) => { isSwiping = true; });
+        canvas.addEventListener('mouseup', (e) => { isSwiping = false; swipePath = []; });
+        canvas.addEventListener('mousemove', handleSwipe);
+
+        let swipeCooldown = false;
+
+        function handleSwipe(e) {
+            if (!isSwiping || gameOver || swipeCooldown) return;
+
+            try {
+                const x = e.touches ? e.touches[0].clientX : e.clientX;
+                const y = e.touches ? e.touches[0].clientY : e.clientY;
+
+                console.log('Swipe event:', { x, y });
+
+                if (swipePath.length > 0) {
+                    const lastPoint = swipePath[swipePath.length - 1];
+                    const dx = x - lastPoint.x;
+                    const dy = y - lastPoint.y;
+                    const segmentLength = Math.sqrt(dx * dx + dy * dy);
+                    let totalLength = segmentLength;
+                    for (let i = 1; i < swipePath.length; i++) {
+                        totalLength += Math.sqrt((swipePath[i].x - swipePath[i-1].x) ** 2 + (swipePath[i].y - swipePath[i-1].y) ** 2);
+                    }
+                    if (totalLength <= MAX_SWIPE_LENGTH) {
+                        swipePath.push({ x, y });
+                    } else {
+                        swipePath = [{ x, y }];
+                    }
+                } else {
+                    swipePath.push({ x, y });
+                }
+
+                for (let i = fruits.length - 1; i >= 0; i--) {
+                    const fruit = fruits[i];
+                    if (checkCollision(fruit)) {
+                        score += 10;
+                        life = Math.min(100, life + LIFE_GAIN_PER_FRUIT);
+                        const isLargeFruit = fruit.radius > 60;
+                        const angle1 = Math.random() * Math.PI;
+                        const angle2 = angle1 + Math.PI;
+                        fruitHalves.push(new FruitHalf(fruit.x, fruit.y, fruit.radius / 2, angle1, isLargeFruit, "half"));
+                        fruitHalves.push(new FruitHalf(fruit.x, fruit.y, fruit.radius / 2, angle2, isLargeFruit, "half"));
+                        fruits.splice(i, 1);
+                        playRandomSwipeSound();
+                        swipeCooldown = true;
+                        setTimeout(() => {
+                            swipeCooldown = false;
+                            console.log('Swipe cooldown reset');
+                        }, 100);
+                    }
+                }
+
+                for (let i = fruitHalves.length - 1; i >= 0; i--) {
+                    const half = fruitHalves[i];
+                    if (half.splittable && checkCollision(half)) {
+                        score += 10;
+                        life = Math.min(100, life + LIFE_GAIN_PER_FRUIT);
+                        const angle1 = Math.random() * Math.PI;
+                        const angle2 = angle1 + Math.PI;
+                        fruitHalves.push(new FruitHalf(half.x, half.y, half.radius / 2, angle1, false, "quarter"));
+                        fruitHalves.push(new FruitHalf(half.x, half.y, half.radius / 2, angle2, false, "quarter"));
+                        fruitHalves.splice(i, 1);
+                        slicedHalves++;
+                        playRandomSwipeSound();
+                        swipeCooldown = true;
+                        setTimeout(() => {
+                            swipeCooldown = false;
+                            console.log('Swipe cooldown reset');
+                        }, 100);
+                    }
+                }
+            } catch (error) {
+                console.error('Error in handleSwipe:', error);
+            }
+        }
+
+        function checkCollision(fruit) {
+            try {
+                for (let i = 1; i < swipePath.length; i++) {
+                    const x1 = swipePath[i-1].x;
+                    const y1 = swipePath[i-1].y;
+                    const x2 = swipePath[i].x;
+                    const y2 = swipePath[i].y;
+                    const dx = x2 - x1;
+                    const dy = y2 - y1;
+                    for (let t = 0; t <= 1; t += 0.1) {
+                        const px = x1 + dx * t;
+                        const py = y1 + dy * t;
+                        const dist = Math.sqrt((px - fruit.x)**2 + (py - fruit.y)**2);
+                        if (dist < fruit.radius) return true;
+                    }
+                }
+                return false;
+            } catch (error) {
+                console.error('Error in checkCollision:', error);
+                return false;
+            }
+        }
+
+        function endGame() {
+            gameOver = true;
+            finalScore.textContent = score;
+            gameOverScreen.style.display = 'block';
+            scoreLevelBox.style.display = 'none';
+            playRandomGameOverSound(); // Play a random game over sound
+        }
+
+        function returnToMainMenu() {
+            console.log('returnToMainMenu called');
+            gameOver = false;
+            score = 0;
+            level = 1;
+            life = 100;
+            LIFE_DEPLETION_RATE = 0.05;
+            slicedHalves = 0;
+            fruits = [];
+            fruitHalves = [];
+            swipePath = [];
+            gameOverScreen.style.display = 'none';
+            startMenu.style.display = 'block';
+            scoreLevelBox.style.display = 'none';
+            document.getElementById('scoreDisplay').textContent = score;
+            document.getElementById('levelDisplay').textContent = level;
+        }
+
+        function showStartMenu() {
+            tapToStartScreen.style.display = 'none';
+            startMenu.style.display = 'block';
+        }
+
+        function startGame() {
+            console.log('startGame called');
+            try {
+                // Resume the audio context to ensure sound plays on mobile
+                if (typeof Howler !== 'undefined' && Howler.ctx) {
+                    Howler.ctx.resume().then(() => {
+                        console.log('Audio context resumed successfully');
+                        // Add a small delay to ensure the context is fully resumed
+                        setTimeout(() => {
+                            playRandomStartGameSound();
+                        }, 100);
+                    }).catch(error => {
+                        console.error('Failed to resume audio context:', error);
+                    });
+                } else {
+                    console.warn('Howler.js not available, skipping audio context resume');
+                }
+
+                startMenu.style.display = 'none';
+                setRandomBackground();
+                scoreLevelBox.style.display = 'block';
+                score = 0;
+                level = 1;
+                life = 100;
+                LIFE_DEPLETION_RATE = 0.05;
+                slicedHalves = 0;
+                fruits = [];
+                fruitHalves = [];
+                swipePath = [];
+                gameOver = false;
+                levelComplete = false;
+
+                gameLoop();
+            } catch (error) {
+                console.error('Error in startGame:', error);
+            }
+        }
+
+        // Add click and touch event listeners to the start button
+        startButton.addEventListener('click', () => {
+            console.log('Start button clicked');
+            startGame();
+        });
+        startButton.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            console.log('Start button touched');
+            startGame();
+        });
+
+        // Add click and touch event listeners to the continue button
+        continueButton.addEventListener('click', () => {
+            console.log('Continue button clicked');
+            continueGame();
+        });
+        continueButton.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            console.log('Continue button touched');
+            continueGame();
+        });
+
+        // Add click and touch event listeners to the restart button on level complete screen
+        restartButtonLevelComplete.addEventListener('click', () => {
+            console.log('Restart button (level complete) clicked');
+            restartGame();
+        });
+        restartButtonLevelComplete.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            console.log('Restart button (level complete) touched');
+            restartGame();
+        });
+
+        // Add click and touch event listeners to the restart button on game over screen
+        restartButtonGameOver.addEventListener('click', () => {
+            console.log('Restart button (game over) clicked');
+            restartGame();
+        });
+        restartButtonGameOver.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            console.log('Restart button (game over) touched');
+            restartGame();
+        });
+
+        // Add click and touch event listeners to the main menu button on game over screen
+        mainMenuButton.addEventListener('click', () => {
+            console.log('Main Menu button clicked');
+            returnToMainMenu();
+        });
+        mainMenuButton.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            console.log('Main Menu button touched');
+            returnToMainMenu();
+        });
+
+        // Show the "Tap to Start" screen and play soundtrack on first interaction
+        tapToStartScreen.addEventListener('click', () => {
+            console.log('Tap to Start clicked');
+            if (soundtrack && !isMuted) {
+                soundtrack.play();
+            }
+            showStartMenu();
+        });
+        tapToStartScreen.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            console.log('Tap to Start touched');
+            if (soundtrack && !isMuted) {
+                soundtrack.play();
+            }
+            showStartMenu();
+        });
+
+        tapToStartScreen.style.display = 'block';
+    </script>
+</body>
+</html>
